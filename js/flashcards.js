@@ -138,12 +138,18 @@ const FlashcardUI = (() => {
       const preview = def
         ? `${def.partOfSpeech ? def.partOfSpeech.slice(0, 4) + ' \u00B7 ' : ''}${def.definition}`
         : '';
+      const audioBtn = card.audioUrl
+        ? `<button class="fc-list-audio" data-audio="${card.audioUrl}" aria-label="Pronounce">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          </button>`
+        : '';
       return `
         <div class="fc-list-item" data-word="${card.word}">
           <div class="fc-list-item-content">
             <div class="fc-list-word">${card.word}</div>
             <div class="fc-list-def">${preview}</div>
           </div>
+          ${audioBtn}
           <button class="fc-list-delete" data-word="${card.word}" aria-label="Delete">&times;</button>
         </div>`;
     }).join('');
@@ -153,6 +159,13 @@ const FlashcardUI = (() => {
         const word = el.parentElement.dataset.word;
         showSearchView();
         if (typeof App !== 'undefined') App.searchWord(word);
+      });
+    });
+
+    list.querySelectorAll('.fc-list-audio').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        new Audio(el.dataset.audio).play();
       });
     });
 
@@ -197,6 +210,19 @@ const FlashcardUI = (() => {
     fcCard.classList.remove('flipped');
 
     document.getElementById('fcWordFront').textContent = card.word;
+
+    // Audio button on front
+    const frontAudioEl = document.getElementById('fcAudioFront');
+    if (card.audioUrl) {
+      frontAudioEl.classList.remove('hidden');
+      frontAudioEl.onclick = (e) => {
+        e.stopPropagation();
+        new Audio(card.audioUrl).play();
+      };
+    } else {
+      frontAudioEl.classList.add('hidden');
+    }
+
     document.getElementById('fcProgress').textContent = `${studyIndex + 1} / ${studyDeck.length}`;
 
     const fill = ((studyIndex + 1) / studyDeck.length) * 100;
@@ -205,8 +231,15 @@ const FlashcardUI = (() => {
     // Build back content
     const content = document.getElementById('fcCardContent');
     let html = `<div class="word-title">${card.word}</div>`;
-    if (card.phonetic) {
-      html += `<div class="word-phonetics">${card.phonetic}</div>`;
+    if (card.phonetic || card.audioUrl) {
+      html += `<div class="word-phonetics">`;
+      if (card.phonetic) html += `<span>${card.phonetic}</span>`;
+      if (card.audioUrl) {
+        html += ` <button class="audio-btn fc-back-audio" data-audio="${card.audioUrl}" aria-label="Pronounce">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+        </button>`;
+      }
+      html += `</div>`;
     }
 
     (card.definitions || []).slice(0, 3).forEach(def => {
@@ -223,6 +256,14 @@ const FlashcardUI = (() => {
     });
 
     content.innerHTML = html;
+
+    const backAudioBtn = content.querySelector('.fc-back-audio');
+    if (backAudioBtn) {
+      backAudioBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        new Audio(backAudioBtn.dataset.audio).play();
+      });
+    }
   }
 
   function flipCard() {
