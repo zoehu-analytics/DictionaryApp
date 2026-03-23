@@ -1,11 +1,11 @@
-const CACHE_NAME = 'dictionary-v1';
+const CACHE_NAME = 'dictionary-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/flashcards.js',
-  '/manifest.json',
+  './',
+  './index.html',
+  './css/style.css',
+  './js/app.js',
+  './js/flashcards.js',
+  './manifest.json',
 ];
 
 self.addEventListener('install', (e) => {
@@ -25,10 +25,9 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Don't cache API calls
-  if (e.request.url.includes('rapidapi.com')) return;
+  if (e.request.url.includes('dictionaryapi.dev')) return;
 
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request).catch(() => caches.match(e.request))
   );
 });
