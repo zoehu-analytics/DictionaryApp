@@ -2,7 +2,7 @@
   "name": "Dictionary",
   "short_name": "Dictionary",
   "description": "Look up words, save flashcards, and study vocabulary.",
-  "start_url": "/",
+  "start_url": "/DictionaryApp/",
   "display": "standalone",
   "background_color": "#F8F9FA",
   "theme_color": "#2563EB",
